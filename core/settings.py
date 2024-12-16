@@ -53,6 +53,7 @@ THIRDPARTY_APPS = [
 
 PROJECTS_APPS = [
     "apps.users",
+    "apps.books"
 ]
 
 

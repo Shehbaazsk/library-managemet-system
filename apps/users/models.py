@@ -24,6 +24,9 @@ class User(AbstractUser, CommonModel):
 
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(blank=True)
+    bio = models.TextField(blank=True, null=True)
 
     # add more field
+
+    def __str__(self):
+        return self.user.email
