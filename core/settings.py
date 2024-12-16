@@ -30,7 +30,8 @@ SECRET_KEY = env.str("SECRET_KEY", "my-secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1:8000", "localhost"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
+                         "127.0.0.1", "localhost"])
 
 
 # Application definition
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 THIRDPARTY_APPS = [
+    "drf_yasg",
     "rest_framework",
     "rest_framework_simplejwt",
 ]
@@ -54,9 +56,7 @@ PROJECTS_APPS = [
 ]
 
 
-
 INSTALLED_APPS += THIRDPARTY_APPS + PROJECTS_APPS
-
 
 
 MIDDLEWARE = [
@@ -95,8 +95,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env.str("DB_NAME", "library_db"),
+        'USER': env.str("DB_USER", 'root'),
+        'PASSWORD': env.str("DB_PASSWORD", 'root'),
+        'HOST': env.str('DB_HOST', '127.0.0.1'),
+        'PORT': env.int('DB_PORT', 3306),
     }
 }
 
@@ -143,3 +147,52 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.User"
+LOGIN_URL = 'api/users/login'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'django_app.log',
+            'maxBytes': 50 * 1024 * 1024,  # 50 MB
+            'backupCount': 5,  # Keep the last 5 files
+            'level': 'INFO',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}

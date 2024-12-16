@@ -8,8 +8,8 @@ from apps.utils.common_model import CommonModel
 class User(AbstractUser, CommonModel):
     username = None
     email = models.EmailField(unique=True, null=False, blank=False)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=30, blank=True, null=True)
 
     # add more field
 
@@ -25,5 +25,5 @@ class User(AbstractUser, CommonModel):
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
-     
-     # add more field
+
+    # add more field

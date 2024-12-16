@@ -3,16 +3,18 @@ from rest_framework import serializers
 from apps.users.models import User
 
 
-class UserRegisterSerializers(serializers.ModelSerializer):
+class AuthorRegisterSerializers(serializers.ModelSerializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(
         write_only=True, required=True, label="Password Confirmation"
     )
+    bio = serializers.CharField()
 
     class Meta:
         model = User
-        fields = ["email", "password", "password2"]
+        fields = ["email", "password", "password2",
+                  "bio", "first_name"]
 
     def validate_email(self, value):
         if User.objects.filter(email=value.lower()).exists():
@@ -28,9 +30,6 @@ class UserRegisterSerializers(serializers.ModelSerializer):
         del attrs["password2"]
 
         return attrs
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
