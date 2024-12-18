@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.users.api.api_views import (
     AuthorListAPIView,
     AuthorRegisterAPIView,
-    AuthorRetrieveAPIView,
+    AuthorRetrieveDestroyAPIView,
 )
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path("login/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("register/", AuthorRegisterAPIView.as_view(), name="register"),
     path('authors/', AuthorListAPIView.as_view(), name='author-list'),
-    path('authors/<int:id>/', AuthorRetrieveAPIView.as_view(), name='author-detail'),
+    path('authors/<int:id>/', AuthorRetrieveDestroyAPIView.as_view(),
+         name='author-retrieve-delete'),
 ]

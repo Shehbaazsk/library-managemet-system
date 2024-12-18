@@ -216,7 +216,7 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization',
             'in': 'header',  # This tells Swagger to send the token in the Authorization header
         }
-    }
+    },
 }
 
 

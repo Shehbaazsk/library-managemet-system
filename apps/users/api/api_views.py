@@ -1,7 +1,7 @@
 from django.db import transaction
-from rest_framework import status
+from rest_framework import filters, status
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -56,8 +56,11 @@ class AuthorListAPIView(ListAPIView):
     """API for listing all authors"""
     permission_classes = (IsAuthenticated,)
     serializer_class = ListAuthorSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ['user__email', 'user__first_name']
 
     def get_queryset(self):
+
         return Author.objects.filter(
             user__is_delete=False,
             user__is_active=True
@@ -66,7 +69,7 @@ class AuthorListAPIView(ListAPIView):
         ).order_by("-user__created_at")
 
 
-class AuthorRetrieveAPIView(RetrieveAPIView):
+class AuthorRetrieveDestroyAPIView(RetrieveDestroyAPIView):
     """API for retrieving a specific author by ID"""
     permission_classes = (IsAuthenticated,)
     serializer_class = GetAuthorSerializer
@@ -84,3 +87,9 @@ class AuthorRetrieveAPIView(RetrieveAPIView):
             return self.get_queryset().get(user__id=self.kwargs['id'])
         except Author.DoesNotExist:
             raise NotFound(detail="Author not found", code=404)
+
+    def perform_destroy(self, instance):
+        instance.user.is_delete = True
+        instance.user.save()
+        instance.is_delete = True
+        instance.save()
