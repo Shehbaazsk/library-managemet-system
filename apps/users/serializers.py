@@ -1,6 +1,9 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from apps.users.models import User
+from apps.users.models import Author, User
+from apps.utils.common_model import CommonModelSerializer
+from apps.utils.exceptions import CustomValidationError
 
 
 class AuthorRegisterSerializers(serializers.ModelSerializer):
@@ -17,16 +20,15 @@ class AuthorRegisterSerializers(serializers.ModelSerializer):
                   "bio", "first_name"]
 
     def validate_email(self, value):
-        if User.objects.filter(email=value.lower()).exists():
-            raise serializers.ValidationError(
-                "A user with this email already exist")
+        if User.objects.filter(email__iexact=value).exists():
+            raise CustomValidationError(
+                "A user with this email already exists."
+            )
         return value
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
-            raise serializers.ValidationError(
-                {"password": "Password fields didn't match."}
-            )
+            raise CustomValidationError("The password field does not match")
         del attrs["password2"]
 
         return attrs
@@ -35,4 +37,27 @@ class AuthorRegisterSerializers(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["uuid", "email", "first_name", "last_name"]
+        fields = ["id", "email", "first_name", "last_name"]
+
+
+class ListAuthorSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Author
+        fields = ["user", "bio"]
+
+
+class UserAllDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        # fields = '__all__'
+        exclude = ('password',)
+
+
+class GetAuthorSerializer(serializers.ModelSerializer):
+    user = UserAllDetailsSerializer()
+
+    class Meta():
+        model = Author
+        fields = ["user", "bio"]

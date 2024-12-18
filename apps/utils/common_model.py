@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.db import models
+from rest_framework import serializers
 
 
 class CommonModel(models.Model):
@@ -16,3 +17,11 @@ class CommonModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class CommonModelSerializer(serializers.ModelSerializer):
+    """Serializer for the CommonModel fields"""
+
+    class Meta:
+        # fields = ["uuid", "is_active", "is_delete", "created_at", "updated_at"]
+        fields = ["id", "is_active", "is_delete", "created_at", "updated_at"]

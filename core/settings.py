@@ -10,12 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
 
 env = environ.Env()
 environ.Env.read_env()
+
+# Debugging: Print the environment variables
+print(f"SECRET_KEY: {env.str('SECRET_KEY')}")
+print(f"DEBUG: {env.bool('DEBUG')}")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -148,7 +153,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.User"
-LOGIN_URL = 'api/users/login'
+LOGIN_URL = '/api/users/login'
+LOGIN_REDIRECT_URL = "/swagger/"
 
 LOGGING = {
     'version': 1,
@@ -179,6 +185,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
     },
 }
 
@@ -194,6 +204,25 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "apps.utils.paginations.CustomPageNumberPagination",
     "PAGE_SIZE": 10,
+    'EXCEPTION_HANDLER': 'apps.utils.exceptions.custom_exception_handler',
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',  # This tells Swagger to send the token in the Authorization header
+        }
+    }
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=env.int("ACCESS_TOKEN_LIFETIME_MINUTES", default=6000)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=env.int("REFRESH_TOKEN_LIFETIME_DAYS", default=7)),
+    'ALGORITHM': env.str("JWT_ALGORITHM", 'HS256'),
+    'SIGNING_KEY': env.str("JWT_SECRET_KEY", "my-secret"),
 }

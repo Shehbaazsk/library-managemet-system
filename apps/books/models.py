@@ -17,7 +17,7 @@ class Book(CommonModel):
         return self.title
 
 
-class BorrowRecords(CommonModel):
+class BorrowRecord(CommonModel):
 
     book = models.ForeignKey("books.Book", on_delete=models.CASCADE)
     # here we can also use relationship with user or author if needed instead of char field
