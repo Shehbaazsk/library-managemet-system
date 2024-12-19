@@ -13,6 +13,7 @@ from apps.users.serializers import (AuthorRegisterSerializers,
                                     UserAllDetailsSerializer)
 from apps.utils.exceptions import CustomValidationError
 from apps.utils.logger import get_logger
+from apps.utils.permissions import IsAuthorOrAdmin
 
 logger = get_logger(__name__)
 
@@ -41,7 +42,7 @@ class AuthorRegisterAPIView(GenericAPIView):
 
 class AuthorListAPIView(ListAPIView):
     """API for listing all authors"""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated)
     serializer_class = ListAuthorSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ['user__email', 'user__first_name']
@@ -58,7 +59,7 @@ class AuthorListAPIView(ListAPIView):
 
 class AuthorRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """API for retrieving a specific author by ID"""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAuthorOrAdmin)
     serializer_class = GetAuthorSerializer
     lookup_field = 'id'
     queryset = Author.objects.all()
