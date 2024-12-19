@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import filters, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import (GenericAPIView, ListAPIView,
                                      RetrieveUpdateDestroyAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -13,7 +13,7 @@ from apps.users.serializers import (AuthorRegisterSerializers,
                                     UserAllDetailsSerializer)
 from apps.utils.exceptions import CustomValidationError
 from apps.utils.logger import get_logger
-from apps.utils.permissions import IsAuthorOrAdmin
+from apps.utils.permissions import IsOwnerOrAdmin
 
 logger = get_logger(__name__)
 
@@ -42,7 +42,7 @@ class AuthorRegisterAPIView(GenericAPIView):
 
 class AuthorListAPIView(ListAPIView):
     """API for listing all authors"""
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ListAuthorSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ['user__email', 'user__first_name']
@@ -59,17 +59,28 @@ class AuthorListAPIView(ListAPIView):
 
 class AuthorRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """API for retrieving a specific author by ID"""
-    permission_classes = (IsAuthenticated, IsAuthorOrAdmin)
+    permission_classes = (IsAuthenticated, IsOwnerOrAdmin,)
     serializer_class = GetAuthorSerializer
     lookup_field = 'id'
     queryset = Author.objects.all()
 
     def get_object(self):
-        return AuthorSerivce.get_author_by_user_id(self.kwargs['id'])
+        author = AuthorSerivce.get_author_by_user_id(self.kwargs['id'])
+        if not (self.request.user.is_staff or author.user == self.request.user):
+            raise PermissionDenied(
+                "You do not have permission to access this author's data.")
+        return author
 
     def put(self, request, *args, **kwargs):
-        return AuthorSerivce.update_author(self.get_object(), request.data)
+        author = self.get_object()
+        if not (self.request.user.is_staff or author.user == self.request.user):
+            raise PermissionDenied(
+                "You do not have permission to access this author's data.")
+        return AuthorSerivce.update_author(author, request.data)
 
     def delete(self, request, *args, **kwargs):
         author = self.get_object()
+        if not (self.request.user.is_staff or author.user == self.request.user):
+            raise PermissionDenied(
+                "You do not have permission to access this author's data.")
         return AuthorSerivce.delete_author(author)
