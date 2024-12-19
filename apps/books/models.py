@@ -7,7 +7,8 @@ from apps.utils.common_model import CommonModel
 class Book(CommonModel):
 
     title = models.CharField(max_length=255)
-    author = models.ForeignKey("users.Author", on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        "users.user", on_delete=models.CASCADE, related_name="books")
     isbn = models.CharField(max_length=13, unique=True)
     available_copies = models.IntegerField(default=0)
 

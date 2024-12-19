@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from apps.users.models import Author, User
-from apps.utils.common_model import CommonModelSerializer
 from apps.utils.exceptions import CustomValidationError
 
 
@@ -37,7 +35,7 @@ class AuthorRegisterSerializers(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name"]
+        fields = ["id", "email", "first_name", "last_name",]
 
 
 class ListAuthorSerializer(serializers.ModelSerializer):

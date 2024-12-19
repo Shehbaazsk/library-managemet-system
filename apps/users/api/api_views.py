@@ -1,16 +1,21 @@
-from django.db import transaction
+
 from rest_framework import filters, status
-from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.generics import (GenericAPIView, ListAPIView,
-                                     RetrieveUpdateDestroyAPIView)
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.api.service import AuthorSerivce
-from apps.users.models import Author, User
-from apps.users.serializers import (AuthorRegisterSerializers,
-                                    GetAuthorSerializer, ListAuthorSerializer,
-                                    UserAllDetailsSerializer)
+from apps.users.models import Author
+from apps.users.serializers import (
+    AuthorRegisterSerializers,
+    GetAuthorSerializer,
+    ListAuthorSerializer,
+)
 from apps.utils.exceptions import CustomValidationError
 from apps.utils.logger import get_logger
 from apps.utils.permissions import IsOwnerOrAdmin
