@@ -203,7 +203,6 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "apps.utils.paginations.CustomPageNumberPagination",
     "PAGE_SIZE": 10,
-    'EXCEPTION_HANDLER': 'apps.utils.exceptions.custom_exception_handler',
 }
 
 SWAGGER_SETTINGS = {

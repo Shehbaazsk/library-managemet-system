@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from apps.users.models import Author, User
-from apps.utils.exceptions import CustomValidationError
 
 
 class AuthorRegisterSerializers(serializers.ModelSerializer):
@@ -19,14 +18,15 @@ class AuthorRegisterSerializers(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
-            raise CustomValidationError(
+            raise serializers.ValidationError(
                 "A user with this email already exists."
             )
         return value
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
-            raise CustomValidationError("The password field does not match")
+            raise serializers.ValidationError(
+                "The password field does not match")
         del attrs["password2"]
 
         return attrs
@@ -59,7 +59,7 @@ class UserAllDetailsSerializer(serializers.ModelSerializer):
         """
         user_id = self.instance.id if self.instance else None
         if User.objects.filter(email=value).exclude(id=user_id).exists():
-            raise CustomValidationError(
+            raise serializers.ValidationError(
                 "A user with this email already exists.")
         return value
 
