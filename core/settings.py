@@ -18,9 +18,6 @@ import environ
 env = environ.Env()
 environ.Env.read_env()
 
-# Debugging: Print the environment variables
-print(f"SECRET_KEY: {env.str('SECRET_KEY')}")
-print(f"DEBUG: {env.bool('DEBUG')}")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.str("SECRET_KEY", "my-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", False)
+DEBUG = env.bool("DEBUG", True)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
                          "127.0.0.1", "localhost"])
@@ -217,6 +214,7 @@ SWAGGER_SETTINGS = {
             'in': 'header',  # This tells Swagger to send the token in the Authorization header
         }
     },
+    'USE_SESSION_AUTH': False,
 }
 
 

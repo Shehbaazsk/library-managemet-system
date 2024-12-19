@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 
 class CommonModel(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, editable=False,)
     # INSTEAD OF EXPOSING PK WE CAN USE UUID
     # uuid = models.UUIDField(default=uuid4, unique=True)
 
