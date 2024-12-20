@@ -230,7 +230,8 @@ SIMPLE_JWT = {
 }
 
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = env.list("CELERY_ACCEPT_CONTENT", default=['json'])
+CELERY_TASK_SERIALIZER = env.str("CELERY_TASK_SERIALIZER", 'json')
+CELERY_RESULT_BACKEND = env.str(
+    "CELERY_RESULT_BACKEND", 'redis://localhost:6379/0')

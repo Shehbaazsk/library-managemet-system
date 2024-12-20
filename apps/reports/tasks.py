@@ -1,11 +1,8 @@
 import json
-import os
-from datetime import datetime
 from pathlib import Path
 
 from celery import shared_task
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.utils.timezone import now
 
 from apps.books.models import Book

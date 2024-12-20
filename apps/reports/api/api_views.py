@@ -12,7 +12,7 @@ class GenerateAndDownloadReportAPIView(APIView):
     API  to trigger report generation in the background and download report.
     """
 
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
 
     def post(self, request):
         try:
