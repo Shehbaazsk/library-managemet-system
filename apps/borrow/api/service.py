@@ -1,54 +1,52 @@
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from apps.books.models import Book
 from apps.books.serializers import BookSerializer
+from apps.borrow.models import BorrowRecord
+from apps.borrow.serializers import BorrowRecordSerializer
 from apps.users.models import Author, User
 from apps.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-class BookService:
+class BorrowRecordService:
 
     @staticmethod
-    def create_book(user, book_data):
+    def create_borrow_record(borrow_data):
         """
-        Create a new book for the specified user.
-        If the user is an admin, they can specify the author.
-        If the user is an authenticated author, they can only create books for themselves.
+        Create a new borrow record for the specified book.
         """
         try:
-            if user.is_superuser:
-                user_id = book_data.get('author')
-                if not user_id:
-                    raise PermissionDenied(
-                        "An author must be specified for this book.")
-                try:
-                    author = User.objects.get(id=user_id, is_deleted=False)
-                except Author.DoesNotExist:
-                    raise PermissionDenied("Author does not exist.")
-
-            elif user.is_authenticated and user.author:
-                user_id = book_data.get('author')
-                if user_id and user_id != user:
-                    raise PermissionDenied(
-                        "You can only create books for yourself.")
-                author = user
+            book = borrow_data.pop('book', None)
+            if not book:
+                raise ValueError("Book id is required.")
+            if book.available_copies > 0:
+                borrow_record = BorrowRecord.objects.create(
+                    book=book, **borrow_data)
+                book.available_copies -= 1
+                book.save()
+                return Response(BorrowRecordSerializer(borrow_record).data, status=status.HTTP_201_CREATED)
             else:
-                raise PermissionDenied(
-                    "You do not have permission to create books.")
-            book_data.pop('author', None)
-            book = Book.objects.create(
-                author=author,
-                **book_data
-            )
-            book.save()
+                return Response(
+                    {"error": "Book is not available."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except ObjectDoesNotExist:
+            logger.error("Book with id %s does not exist.", book.id)
             return Response(
-                {"message": "Book created successfully",
-                 "data": BookSerializer(book).data}, status=status.HTTP_201_CREATED
+                {"error": "Book not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except MultipleObjectsReturned:
+            logger.error("Multiple books found with id %s.", book.id)
+            return Response(
+                {"error": "Database integrity error: multiple books found."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         except Exception as e:
-            logger.error("Failed to create book: %s", str(e), exc_info=True)
-            return Response({"error": "Failed to create book."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error("Failed to create borrow record: %s",
+                         str(e), exc_info=True)
+            return Response({"error": "Failed to create borrow record."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

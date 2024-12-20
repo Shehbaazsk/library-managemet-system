@@ -4,6 +4,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
+from rest_framework.exceptions import PermissionDenied
 from apps.books.api.service import BookService
 from apps.books.models import Book
 from apps.books.serializers import BookSerializer, CreateBookSerializer
@@ -46,6 +47,7 @@ class BookListCreateAPIView(ListCreateAPIView):
 
         except ValidationError as e:
             return Response({"error": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             logger.error("Failed to create book: %s", str(e), exc_info=True)
             return Response({"error": "Failed to create book."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

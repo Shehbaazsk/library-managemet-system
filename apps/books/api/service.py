@@ -47,8 +47,10 @@ class BookService:
             book.save()
             return Response(
                 {"message": "Book created successfully",
-                 "data": BookSerializer(book).data}, status=status.HTTP_201_CREATED
+                 "data": Borr(book).data}, status=status.HTTP_201_CREATED
             )
+        except PermissionDenied as e:
+            return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             logger.error("Failed to create book: %s", str(e), exc_info=True)
             return Response({"error": "Failed to create book."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
