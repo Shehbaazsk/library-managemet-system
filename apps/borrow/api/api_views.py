@@ -1,6 +1,7 @@
 from rest_framework import filters, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -35,13 +36,15 @@ class BookBorrowCreateAPIView(CreateAPIView):
             return Response({"error": "Failed to create book."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class BookRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """API for retrieving, updating, and deleting a book"""
-    permission_classes = [IsAuthenticated, IsAuthorOrAdmin]
-    queryset = Book.objects.select_related('author').all()
-    lookup_field = 'id'
+class BorrowBookReturnAPIView(APIView):
+    permission_classes = [AllowAny,]
 
-    def get_serializer_class(self):
-        if self.request.method == 'PUT' or self.request.method == 'PATCH':
-            return CreateBookSerializer
-        return BookSerializer
+    def put(self, request, borrow_record_id):
+        """
+        Handle PUT request to return a book.
+        """
+        try:
+            return BorrowRecordService.return_book(borrow_record_id)
+        except Exception as e:
+            logger.error("Failed to create book: %s", str(e), exc_info=True)
+            return Response({"error": "Failed to create book."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
