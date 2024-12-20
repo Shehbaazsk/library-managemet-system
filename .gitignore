@@ -8,6 +8,7 @@ media
 .vscode
 # Backup files # 
 *.bak 
+*.log
 
 # If you are using PyCharm # 
 # User-specific stuff
